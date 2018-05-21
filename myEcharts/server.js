@@ -15,8 +15,8 @@ var server = http.createServer(function(req,res){
     // var realPath = path.join('D:/myFile/echarts封装/echartsEncapsulation/html',pathname);
     //var realPath = path.join('D:/myFile/echarts封装/echartsEncapsulation/',pathname);
     //var realPath = path.join('D:/GitHub/echart/echartsEncapsulation/',pathname);
-	var realPath = path.join('D:/myFile/echartsV2/myEcharts/',pathname);
-    //var realPath = path.join('D:/GitHub/echartsV1/myEcharts/',pathname);
+	//var realPath = path.join('D:/myFile/echartsV2/myEcharts/',pathname);
+    var realPath = path.join('D:/GitHub/echartsV2/myEcharts/',pathname);
     //完整的url路径
     console.log(realPath);  
     // F:/nodejs/nodetest/index.html

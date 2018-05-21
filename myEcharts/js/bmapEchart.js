@@ -840,7 +840,7 @@ bMapEchart.prototype.overlyBezierCurve=function(curveName,dazData,curveOption){
 	    out[1] = v[1] * s;
 	    return out;
 	}
-	var arr=[[84.9023,42.148],[116.0046,28.6633],[115.1477,40.8527]];
+	var arr=[[84.9023,42.148],[91.1865,30.1465],[101.4038,36.8207],[106.6992,26.7682],[109.1162,34.2004]];
 	var cps=smoothBezier(arr,0.8,false,[[0, 0], [10000, 1000]]);
 	cps.shift();
 	cps.pop();
@@ -1089,6 +1089,80 @@ bMapEchart.prototype.dropBaz=function(){
 		console.log(e);
 	});
 }
+//通过自定义覆盖来实现贝塞尔曲线
+bMapEchart.prototype.dropBazMarke=function(){
+	map=this.getMap();
+	map.enableScrollWheelZoom();
+	// 复杂的自定义覆盖物
+    function ComplexCustomOverlay(point, text, mouseoverText){
+      this._point = point;
+      this._text = text;
+      this._overText = mouseoverText;
+    }
+    ComplexCustomOverlay.prototype = new BMap.Overlay();
+    ComplexCustomOverlay.prototype.initialize = function(map){
+      this._map = map;
+      var div = this._div = document.createElement("div");
+      div.style.position = "absolute";
+      //div.style.zIndex = BMap.Overlay.getZIndex(this._point.lat);
+      div.style.backgroundColor = "#EE5D5B";
+      div.style.border = "1px solid #BC3B3A";
+      div.style.width='100%';
+      div.style.height='100%';
+      // div.style.color = "white";
+      // div.style.height = "18px";
+      // div.style.padding = "2px";
+      // div.style.lineHeight = "18px";
+      // div.style.whiteSpace = "nowrap";
+      // div.style.MozUserSelect = "none";
+      // div.style.fontSize = "12px"
+      //var span = this._span = document.createElement("span");
+      var canvas=document.createElement("canvas");
+      div.appendChild(canvas);
+      //span.appendChild(document.createTextNode(this._text));      
+      var that = this;
+
+      // var arrow = this._arrow = document.createElement("div");
+      // arrow.style.background = "url(http://map.baidu.com/fwmap/upload/r/map/fwmap/static/house/images/label.png) no-repeat";
+      canvas.style.position = "absolute";
+      canvas.style.width = "100px";
+      canvas.style.height = "100px";
+      canvas.style.top = "22px";
+      canvas.style.left = "10px";
+      //canvas.style.overflow = "hidden";
+      div.appendChild(canvas);
+     
+      // div.onmouseover = function(){
+      //   this.style.backgroundColor = "#6BADCA";
+      //   this.style.borderColor = "#0000ff";
+      //   this.getElementsByTagName("span")[0].innerHTML = that._overText;
+      //   arrow.style.backgroundPosition = "0px -20px";
+      // }
+
+      // div.onmouseout = function(){
+      //   this.style.backgroundColor = "#EE5D5B";
+      //   this.style.borderColor = "#BC3B3A";
+      //   this.getElementsByTagName("span")[0].innerHTML = that._text;
+      //   arrow.style.backgroundPosition = "0px 0px";
+      // }
+
+      map.getPanes().labelPane.appendChild(div);
+      
+      return div;
+    }
+    ComplexCustomOverlay.prototype.draw = function(){
+      var map = this._map;
+      var pixel = map.pointToOverlayPixel(this._point);
+      this._div.style.left = pixel.x - parseInt(this._arrow.style.left) + "px";
+      this._div.style.top  = pixel.y - 30 + "px";
+    }
+    var txt = "银湖海岸城", mouseoverTxt = txt + " " + parseInt(Math.random() * 1000,10) + "套" ;
+        
+    var myCompOverlay = new ComplexCustomOverlay(new BMap.Point(116.407845,39.914101), "银湖海岸城",mouseoverTxt);
+
+    map.addOverlay(myCompOverlay);
+}
+
 
 //自定义导航风格
 /*
