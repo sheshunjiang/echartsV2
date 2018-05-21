@@ -133,7 +133,7 @@
 			option.center=option.seriesData.cp;
 			option.zoom=1;
 			var mapCenterCoord=getMapCoord(provinceData);    //获取地理中心数据
-			var provinceMap=mapEchart.DropMapGeo("sichuan",provinceData,option,function(params){
+			var provinceMap=mapEchart.DropMapGeo(cilckData.name,provinceData,option,function(params){
 				mapEchart.linster('mouseover',function(params){
 					//if(params){}
 					var params=getMapItem(provinceData,params.name);

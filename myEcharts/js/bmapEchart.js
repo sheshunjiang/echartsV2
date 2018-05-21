@@ -2,9 +2,12 @@ function bMapEchart(ele,echarts){
 	this.ele=ele;
 	this.echarts=echarts;
 	this.chart;
+	this.mapName;     //地图名称
+	this.serializableData={"cmd":-1,"data":[]};    //用于序列化数据
 }
-bMapEchart.prototype.droBaiMap=function(mapOption,mapStyle){
+bMapEchart.prototype.droBaiMap=function(mapName,mapOption,mapStyle){
 	var chart=this.chart;
+	this.mapName=mapName;
 	if(chart){
 		chart.dispose();
 	}
@@ -294,6 +297,10 @@ bMapEchart.prototype.overlyPie=function(pieName,pieData,pieOption){
 		});
 	}
 }
+
+// bMapEchart.prototype.overlyPie=function(){
+
+// }
 
 //叠加热力图
 /*
@@ -702,8 +709,34 @@ bMapEchart.prototype.overlyLine=function(lineName,liensData,lineOption,animation
 }
 
 //叠加贝塞尔曲线
-bMapEchart.prototype.overlyBezierCurve=function(curveName,curveData,curveOption){
+/*
+curveData:[{name:"阿里地区",coord:[82.3645,32.7667]},{name:"阿里地区",coord:[82.3645,32.7667]}]   //绘制点所需的数据
+bazOption:{       //相关配置参数
+	lineWidth:1,      //线宽
+	lineColor:'#ff0033',    //线的颜色
+	spotRadius:5,           //节点的大小，为0时不显示节点
+	spotColor:'#ccff33'      //线的颜色
+}
+gradualColor:{        //是否渐变色，此参数可省略，即不使用渐变色填充曲线
+	isGradual:true,   //是否启用渐变色
+	direction:[0,0,0,1],  //渐变方向,0,0,0,1(下-上);0,1,0,0(上-下);0,0,1,0(左-右);
+	colors:[
+		{               //起始颜色
+			offset:0, 
+			color: '#000000'
+		},
+		{               //终止颜色
+			offset:1, 
+			color: '#ffffff'
+		}
+	]
+}
+*/
+bMapEchart.prototype.overlyBezierCurve=function(curveName,dazData,curveOption){
 	var map=this.getMap();
+	var point = new BMap.Point(84.9023,42.148);    
+	var pixel=map.pointToPixel(point);  
+	console.log(pixel);
 	var ArrayCtor = typeof Float32Array === 'undefined'
 	    ? Array
 	    : Float32Array;
@@ -807,8 +840,6 @@ bMapEchart.prototype.overlyBezierCurve=function(curveName,curveData,curveOption)
 	    out[1] = v[1] * s;
 	    return out;
 	}
-	// var start=[84.9023,42.148];
-	// var end=[115.1477,40.8527];
 	var arr=[[84.9023,42.148],[116.0046,28.6633],[115.1477,40.8527]];
 	var cps=smoothBezier(arr,0.8,false,[[0, 0], [10000, 1000]]);
 	cps.shift();
@@ -834,7 +865,6 @@ bMapEchart.prototype.overlyBezierCurve=function(curveName,curveData,curveOption)
 		}
 		pathPointsArr=pathPointsArr.concat(pathPoints);
 	}
-	//console.log(polylines);
 	console.log(pathPointsArr);
 	var polyline = new BMap.Polyline(pathPointsArr, {strokeColor:"blue", strokeWeight:2, strokeOpacity:0.5}); 
 	map.addOverlay(polyline);
@@ -850,6 +880,214 @@ bMapEchart.prototype.overlyBezierCurve=function(curveName,curveData,curveOption)
         point.push(y);
         return point;
 	}
+}
+bMapEchart.prototype.baz=function(bazLineID,dazData,bazOption,gradualColor){
+	var map=this.getMap();
+	var that=this;
+	var falg=false;  //鼠标是否缩放过
+	var myChart=this.chart;
+	var dazData=dazData;
+	var arr=[];
+	arr=dazData;
+	var data=[];
+	dropBezierCurve();
+	// this.chart.on("geoRoam",function(params){
+	// 	falg=true;
+	// 	dropBezierCurve();
+	// });
+	// map.addEventListener('zoomend',function(evt){
+	// 	console.log(evt);
+	// 	console.log(bazLineID);
+	// 	falg=true;
+	// 	dropBezierCurve();
+	// });
+	function dropBezierCurve(){
+		// if(that.disable){
+		// 	return;
+		// }
+		var option=myChart.getOption();
+		data=[];
+		for(var i=0;i<arr.length;i++){
+			//data.push(myChart.convertToPixel('geo',arr[i].coord));   //地理坐标转像素坐标
+			//var point = new BMap.Point(84.9023,42.148);    
+			//var pixel=map.pointToPixel(point);
+			var point=map.pointToPixel(new BMap.Point(arr[i].coord[0],arr[i].coord[1]));
+			data.push([point.x,point.y]); 
+		}
+		if(!option.graphic){
+			option.graphic=[{}];
+			option.graphic[0].elements=[];
+		}
+		if(falg){
+			for(var j=0;j<option.graphic[0].elements.length;j++){
+				if((option.graphic[0].elements[j].id==bazLineID) || (option.graphic[0].elements[j].type=="circle" && option.graphic[0].elements[j].bazLineID==bazLineID)){
+					option.graphic[0].elements.splice(j,1);
+					j-=1;
+				}
+			}
+		}
+		var strokeColor=bazOption.lineColor? bazOption.lineColor : '#000';
+		if(gradualColor && gradualColor.isGradual){
+			strokeColor=new echarts.graphic.LinearGradient(
+                    gradualColor.direction[0], gradualColor.direction[1], gradualColor.direction[2], gradualColor.direction[3], 
+                    gradualColor.colors
+                );
+		}
+	    //线
+		var polyline={
+			type:"polyline",
+			id:bazLineID,
+			invisible:false,
+			zlevel:0,
+			z:2,
+			shape:{
+				points:data,
+				smooth:0.5
+			},
+			 style:{
+			 	lineWidth:bazOption.lineWidth ? bazOption.lineWidth:1,
+	        	stroke:strokeColor,
+	        },
+		};
+		option.graphic[0].elements.push(polyline);
+	    //点
+	    for(var i=0;i<data.length;i++){
+	  		var ss={
+	  			type: 'circle',
+		        bazLineID:bazLineID,
+		        textDesc:arr[i].name,
+		        position: data[i],
+		        shape: {
+		            cx: 0,
+		            cy: 0,
+		            r: bazOption.spotRadius ? bazOption.spotRadius:5,
+		        },
+		        style:{
+		        	fill:bazOption.spotColor ? bazOption.spotColor:'#000',
+		        },
+		        invisible: false,
+		        draggable: true,
+		        ondrag: echarts.util.curry(onPointDragging, i),
+		        // onmousemove: echarts.util.curry(showTooltip, i),
+		        // onmouseout: echarts.util.curry(hideTooltip),
+		        z: 2
+	  		}
+		  	option.graphic[0].elements.push(ss);
+		}
+		myChart.setOption(option);
+
+	}
+
+	function showTooltip(dataIndex) {
+	    var option=myChart.getOption();
+	    var textObj={
+	    	type:'text',
+	    	invisible:false,
+	    	style:{
+	    		text:this.textDesc,
+	    		x:this.position[0],
+	    		y:this.position[1]-20,
+	    		fill:"#fff"
+	    	}
+	    };
+	     option.graphic[0].elements.push(textObj);
+	     myChart.setOption(option,true);
+	}
+
+	function hideTooltip() {
+	   var option=myChart.getOption();
+	   for(var i=0;i<option.graphic[0].elements.length;i++){
+		  if(option.graphic[0].elements[i].type=="text"){
+		  	option.graphic[0].elements.splice(i,1);
+		  	i-=1;
+		  }
+	   }
+	   myChart.setOption(option,true);
+	}
+
+	function onPointDragging(dataIndex) {
+	    var option=myChart.getOption();
+	    data[dataIndex]=this.position;
+	   //线的位置改变
+	   var elements=option.graphic[0].elements;
+	   var circleArr=[];     //小圆点数组
+	   for(var i=0;i<elements.length;i++){
+	   		if(elements[i].type=="polyline" && elements[i].id==this.bazLineID){
+	   			 elements[i].shape.points=data;
+	   		}
+	   		if(elements[i].type=="circle" && elements[i].id==this.__ecGraphicId){    //点的位置改变
+	   			elements[i].position=this.position;
+	   		}
+	   }
+	   option.graphic.elements=elements;
+	   // arr[dataIndex].coord=myChart.convertFromPixel("geo",this.position);
+	   var p=new BMap.Pixel(this.position[0],this.position[1]);    //像素转地理坐标
+	   var point=map.pixelToPoint(p);  
+	   arr[dataIndex].coord=[point.lng,point.lat];
+	   myChart.setOption(option,true);
+	}
+
+	function onPointWheel(){}
+	console.log(this);
+}
+bMapEchart.prototype.dropBaz=function(){
+	var map=this.getMap();
+	//$(this.ele).html("div");
+	// var id="view"; //transparency
+	// var htm="<div id="+id+" style='width:100px;height:100px;background:rgb(0,0,0); position:absolute; top:0; left:0; z-index:-10;'></div>";
+	// var warp=$(this.ele).parent();
+	// $(warp).append($(htm));
+	// console.log(map.getPanes());
+	// map.getPanes().mapPane.appendChild($(htm));
+	//this.ele.innerHTML=this.ele.innerHTML+htm;
+	 //var odiv=document.getElementById(id);
+	// var parentNode=this.ele.parentNode;
+	// console.log(parentNode);
+	//var odiv=document.getElementById(id);
+	//parentNode.innerHTML += htm;
+	//parentNode.appendChild(odiv);
+	// var canvas=odiv.getElementsByTagName("canvas");
+	// console.log(canvas);
+
+	// 定义一个控件类，即function  
+	function ZoomControl(){  
+	    // 设置默认停靠位置和偏移量  
+	    this.defaultAnchor = BMAP_ANCHOR_TOP_LEFT;  
+	    this.defaultOffset = new BMap.Size(0, 0);
+	}  
+	// 通过JavaScript的prototype属性继承于BMap.Control  
+	ZoomControl.prototype = new BMap.Control();
+
+	ZoomControl.prototype.initialize = function(map){  
+    	// 创建一个DOM元素  
+	    var div = document.createElement("div");  
+	    // 添加文字说明  
+	    //div.appendChild(document.createTextNode("放大2级"));  
+	    div.appendChild(document.createElement("canvas"));
+	    // 设置样式  
+	    div.style.width="100%";
+	     div.style.height="200px";
+	    div.style.cursor = "pointer";  
+	    div.style.border = "1px solid gray";  
+	    div.style.backgroundColor = "transparency";  
+	    // 绑定事件，点击一次放大两级  
+	    div.onclick = function(e){  
+	    	console.log(e);
+	        map.zoomTo(map.getZoom() + 2);  
+	    }  
+	    // 添加DOM元素到地图中  
+	    map.getContainer().appendChild(div);  
+	    // 将DOM元素返回  
+	    return div;  
+
+	}
+	// 创建控件实例  
+	var myZoomCtrl = new ZoomControl();  
+	// 添加到地图当中  
+	map.addControl(myZoomCtrl);  
+	map.addEventListener('click',function(e){
+		console.log(e);
+	});
 }
 
 //自定义导航风格
@@ -911,3 +1149,26 @@ bMapEchart.prototype.getMap=function(){
 	var bmap=this.chart.getModel().getComponent('bmap').getBMap();
 	return bmap;
 }
+
+ //序列化
+bMapEchart.prototype.serializable=function(){
+ 	var option=this.chart.getOption();
+ 	var data={
+ 		"name":this.mapName,
+ 		"option":option,
+ 		//"mapData":
+ 	};
+ 	this.serializableData.cmd=1;
+ 	this.serializableData.data.push(data);
+ 	// console.log(typeof option);
+ 	// console.log(this);
+ 	var serializableObj=JSON.stringify(data);
+ 	//console.log(serializableObj);
+ 	//console.log(JSON.stringify(this));
+ }
+ //反序列化
+bMapEchart.prototype.deserialization=function(data){
+ 	var option=data.option;
+ 	chart=this.echarts.init(this.ele);
+ 	chart.setOption(option);
+ }

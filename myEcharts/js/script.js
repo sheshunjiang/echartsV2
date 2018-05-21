@@ -3,14 +3,17 @@ function mapEcharts(ele,echarts,type){
 	this.ele=ele;
 	this.echarts=echarts;
 	this.chart;
-	this.type=type;
+	this.type=type;         //地图类型
+	this.mapName;
 	this.disable=false;     //禁止绘画
+	this.serializableData={"cmd":-1,"data":[]};    //用于序列化数据
 }
 
 mapEcharts.prototype.DropMapGeo=function(mapName,geoJsonData,option,callback){
 	var ele=this.ele;
 	var echarts=this.echarts;
 	var regionName=mapName;
+	this.mapName=mapName;
 	var chart=this.chart;
 	this.count++;
 	if(chart){
@@ -1497,23 +1500,51 @@ mapEcharts.prototype.zoomAnimation=function(){
 
 
  //序列化
- mapEcharts.prototype.serializable=function(name){
+mapEcharts.prototype.serializable=function(name){
  	var option=this.chart.getOption();
  	var data={
- 		"name":name,
+ 		"name":this.mapName,
  		"option":option,
  		//"mapData":
  	};
- 	console.log(typeof option);
- 	console.log(this);
- 	var serializableObj=JSON.stringify(data);
- 	//console.log(serializableObj);
+ 	if(this.serializableData.cmd==1){
+ 		var falg=false;
+ 		for(var i=0;i<this.serializableData.data.length;i++){
+ 			if(this.serializableData.data[i].name==data.name){
+ 				this.serializableData.data[i]=data;
+ 				falg=true;
+ 				break;
+ 			}
+ 		}
+ 		if(!falg){
+ 			this.serializableData.data.push(data);
+ 		}
+
+ 	}else{
+ 		this.serializableData.cmd=1;
+ 		this.serializableData.data.push(data);
+ 	}
+ 	//this.serializableData.data.push(data);
+ 	// console.log(typeof option);
+ 	// console.log(this);
+ 	var serializableObj=JSON.stringify(this.serializableData);
+ 	console.log(serializableObj);
  	//console.log(JSON.stringify(this));
+ 	//将序列化的数据发送给后台
  }
  //反序列化
- mapEcharts.prototype.deserialization=function(data){
- 	var option=data.option;
+mapEcharts.prototype.deserialization=function(name,data){
  	chart=this.echarts.init(this.ele);
+ 	var option=chart.getOption();
+ 	var serializableData=data.option.parseJSON();
+ 	var option={};
+ 	if(serializableData.cmd==1){
+ 		for(var i=0;i<serializableData.data.length;i++){
+ 			if(serializableData.data[i].name==name){
+ 				option=serializableData.data[i].option;
+ 			}
+ 		}
+ 	}
  	chart.setOption(option);
  }
 

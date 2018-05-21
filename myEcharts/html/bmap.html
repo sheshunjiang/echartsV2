@@ -9,6 +9,7 @@
 	<script type="text/javascript" src="../js/bmap.min.js"></script>
 	<script type="text/javascript" src="../js/RichMarker_min.js"></script>
 	<script type="text/javascript" src="../js/LuShu_min.js"></script>
+	<!-- <script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script> -->
 	<script type="text/javascript" src="../js/bmapEchart.js"></script>
 	<style type="text/css">
 		h1,h2,h3{margin:0 0;}
@@ -33,6 +34,7 @@
 			<button>线</button>
 			<button>导航</button>
 		</div>
+		<!-- <div style='width:100px;height:100px;background:"transparency"; position:absolute; top:0; left:0; z-index:0;'></div> -->
 	</div>
 </body>
 <!-- 依赖百度echarts.js -->
@@ -47,7 +49,7 @@
 	     roam: true,
 	};
 	var mapStyle={};
-	bmapEchart.droBaiMap(mapOption,mapStyle);
+	bmapEchart.droBaiMap('baiduMap',mapOption,mapStyle);
 	//添加散列图
 	//overlyScatter();
 	//添加饼图
@@ -64,11 +66,13 @@
 	//overlyLine();
 	//自定义导航
 	//customNavigation();
-	bmapEchart.overlyBezierCurve();
+	//bmapEchart.overlyBezierCurve();
+	//overlyBaz();
+	bmapEchart.dropBaz();
 	for(var i=0;i<buttons.length;i++){
 		buttons[i].index=i;
 		buttons[i].onclick=function(){
-			bmapEchart.droBaiMap(mapOption,mapStyle);
+			bmapEchart.droBaiMap('baiduMap',mapOption,mapStyle);
 			if(this.index==0){
 				//添加散列图
 				overlyScatter();
@@ -329,7 +333,32 @@
 		var p2 = new BMap.Point(103.891202,30.795595);
 	    drv.search(p1, p2);
 	}
-
+	//绘制贝塞尔曲线
+	function overlyBaz(){
+		//echarts绘制贝塞尔曲线
+		var dazData=[{name:"乌鲁木齐",coord:[84.9023,42.148]},{name:"南昌",coord:[116.0046,28.6633]},{name:"北京",coord:[116.4551,40.2539]}]   //绘制点所需的数据
+		var bazOption={       //相关配置参数
+			lineWidth:1,      //线宽
+			lineColor:'#ff0033',    //线的颜色
+			spotRadius:5,           //节点的大小，为0时不显示节点
+			spotColor:'#ccff33'      //线的颜色
+		}
+		var gradualColor={        //是否渐变色，此参数可省略，即不使用渐变色填充曲线
+			isGradual:true,   //是否启用渐变色
+			direction:[0,0,0,1],  //渐变方向,0,0,0,1(下-上);0,1,0,0(上-下);0,0,1,0(左-右);
+			colors:[
+				{               //起始颜色
+					offset:0, 
+					color: '#000000'
+				},
+				{               //终止颜色
+					offset:1, 
+					color: '#ffffff'
+				}
+			]
+		}
+		bmapEchart.baz('bazLine1',dazData,bazOption,gradualColor);
+	}
 	function getMapCoord(geoData){
 		var data={};
 		for(var i=0; i<geoData.features.length;++i){
