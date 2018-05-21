@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>3D行政区域切换</title>
+	<script type="text/javascript" src="../js/echarts.js"></script>
+	<!-- <script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script> -->
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=sW6hnWG0HR3m0Tr3s3OVjcGFPcEdkdqq"></script>
+	<script type="text/javascript" src="../js/bmap.min.js"></script>
+	<script type="text/javascript" src="../js/RichMarker_min.js"></script>
+	<script type="text/javascript" src="../js/LuShu_min.js"></script>
+	<script type="text/javascript" src="../js/bmapEchart.js"></script>
+	<style type="text/css">
+		h1,h2,h3{margin:0 0;}
+		h1{font-size: 30px;}
+		.warp{position: relative;}
+		body,html,.warp{width: 100%; height: 100%; margin: 0;}
+		#main{/*width: 800px; height: 600px;*/ width: 100%; height: 100%;}
+		.buttons{height: 60px; margin: 10px; position: absolute; bottom: 0; left: 0; background:#00FFFF;}
+		button{margin: 10px;}
+	</style>
+</head>
+<body>
+	<div class="warp">
+		<div id="main"></div>
+		<div class="buttons">
+			<button>散列图</button>
+			<button>饼图</button>
+			<button>热力图</button>
+			<button>柱状图</button>
+			<button>图片</button>
+			<button>点</button>
+			<button>线</button>
+			<button>导航</button>
+		</div>
+	</div>
+</body>
+<!-- 依赖百度echarts.js -->
+<script type="text/javascript">
+	var buttons=document.getElementsByTagName("button");
+	var ele=document.getElementById("main");
+	var bmapEchart=new bMapEchart(ele,echarts);
+	var mapOption={
+		 backgroundColor:"#60ffff",
+		 center: [104.114129, 30.550339],
+	     zoom: 5,
+	     roam: true,
+	};
+	var mapStyle={};
+	bmapEchart.droBaiMap(mapOption,mapStyle);
+	//添加散列图
+	//overlyScatter();
+	//添加饼图
+	//overlyPie();
+	//添加热力图
+	//overlyHeatMap();
+	//添加柱状图
+	//overlyBar();
+	//添加图片
+	//overlyImg();
+	//添加点
+	//overlySpot();
+	//添加线
+	//overlyLine();
+	//自定义导航
+	//customNavigation();
+	bmapEchart.overlyBezierCurve();
+	for(var i=0;i<buttons.length;i++){
+		buttons[i].index=i;
+		buttons[i].onclick=function(){
+			bmapEchart.droBaiMap(mapOption,mapStyle);
+			if(this.index==0){
+				//添加散列图
+				overlyScatter();
+			}
+			if(this.index==1){
+				//添加饼图
+				overlyPie();
+			}
+			if(this.index==2){
+				//添加热力图
+				overlyHeatMap();
+			}
+			if(this.index==3){
+				//添加柱状图
+				overlyBar();
+			}
+			if(this.index==4){
+				//添加图片
+				overlyImg();
+			}
+			if(this.index==5){
+				//添加点
+				overlySpot();
+			}
+			if(this.index==6){
+				//添加线
+				overlyLine();
+			}
+			if(this.index==7){
+				//自定义导航
+				customNavigation();
+			}
+		}
+	}
+
+	//散列图
+	function overlyScatter(){
+		var scatterData=[
+			{"name":"上海","coordinate":[121.4648,31.2891], value:100},
+		    {"name":"东莞","coordinate":[113.8953,22.901],value:15},
+		    {"name":"东营","coordinate":[118.7073,37.5513],value:78},
+		    {"name":"中山","coordinate":[113.4229,22.478],value:56},
+		    {"name":"临汾","coordinate":[111.4783,36.1615],value:215},
+		    {"name":"临沂","coordinate":[118.3118,35.2936],value:45},
+		    {"name":"丹东","coordinate":[124.541,40.4242],value:152},
+		    {"name":"丽水","coordinate":[119.5642,28.1854],value:200},
+		    {"name":"乌鲁木齐","coordinate":[87.9236,43.5883],value:210},
+		    {"name":"佛山","coordinate":[112.8955,23.1097],value:140},
+		    {"name":"保定","coordinate":[115.0488,39.0948],value:189},
+		    {"name":"兰州","coordinate":[103.5901,36.3043],value:244},
+		    {"name":"包头","coordinate":[110.3467,41.4899],value:256},
+		    {"name":"北京","coordinate":[116.4551,40.2539],value:147},
+		    {"name":"北海","coordinate":[109.314,21.6211],value:47},
+		    {"name":"南京","coordinate":[118.8062,31.9208],value:248},
+		    {"name":"南宁","coordinate":[108.479,23.1152],value:258},
+		    {"name":"南昌","coordinate":[116.0046,28.6633],value:99}
+		];
+		var scatterOption={   //配置参数
+				symbolSize:10,    //图标大小
+				symbol:'pin',   //图标类型，支持'circle','rect'等及图片路径，svg
+				symbolOffset:[0,0], //图标相对原来位置的偏移量
+				show:true, // 是否显示文本
+				textOffset:[0,0],  //文本偏移量
+				textColor:"#fff",   //文本颜色
+				fontSize:12,       //文字大小
+				fontStyle:'normal',   //字体风格
+				fontWeight: 'normal',          //字体粗细
+				fontFamily:'sans-serif',         //字体系列       
+				color:"#ff6020"       //图标颜色，当symbol为图片时，此参数无效
+			}
+		var	symbolDynamicSize={    //是否根据数据的value值来动态改变symbolSize的大小
+				isDynamicSize:true,    //true时scatterOption.symbolSize无效
+				size:5                 //用作value的除数，数值越大图标越小
+			}
+		var	colorDynamic={         //是否根据value值动态改变图标的颜色
+				isDynamicColor:false,    //true时，scatterOption.color无效
+				color:['#9A32CD','#71C671','#0000FF'],   //颜色数组
+				min:0,                 //最小值
+				max:300                //最大值
+			}
+		bmapEchart.overlyScatter("scatter1",scatterData,scatterOption,symbolDynamicSize,colorDynamic);
+	}
+	//饼图
+	function overlyPie(){
+		var pieData=[
+			{regionName:"南昌",cp:[116.0046,28.6633],data:[{value:335, name:'直接访问'},{value:310, name:'邮件营销'},{value:310, name:'间接访问'}]},
+			{regionName:"太原",cp:[112.3352,37.9413],data:[{value:335, name:'直接访问'},{value:310, name:'邮件营销'},{value:310, name:'间接访问'}]},
+			{regionName:"成都",cp:[103.9526,30.7617],data:[{value:335, name:'直接访问'},{value:310, name:'邮件营销'},{value:310, name:'间接访问'}]},
+			{regionName:"拉萨",cp:[91.1865,30.1465],data:[{value:335, name:'直接访问'},{value:310, name:'邮件营销'},{value:310, name:'间接访问'}]}
+		];
+		var pineOption={
+			radius:'10%',     
+			colorArr:['#F75D5D','#59ED4F','#4C91E7']    
+		};
+		bmapEchart.overlyPie('pie1',pieData,pineOption);
+	}
+	//热力图
+	function overlyHeatMap(){
+		var heatMapData=[
+			{"name":"上海","coordinate":[121.4648,31.2891], value:100},
+		    {"name":"东莞","coordinate":[113.8953,22.901],value:15},
+		    {"name":"东营","coordinate":[118.7073,37.5513],value:78},
+		    {"name":"中山","coordinate":[113.4229,22.478],value:56},
+		    {"name":"临汾","coordinate":[111.4783,36.1615],value:215},
+		    {"name":"临沂","coordinate":[118.3118,35.2936],value:45},
+		    {"name":"丹东","coordinate":[124.541,40.4242],value:152},
+		    {"name":"丽水","coordinate":[119.5642,28.1854],value:200},
+		    {"name":"乌鲁木齐","coordinate":[87.9236,43.5883],value:210},
+		    {"name":"佛山","coordinate":[112.8955,23.1097],value:140},
+		    {"name":"保定","coordinate":[115.0488,39.0948],value:189},
+		    {"name":"兰州","coordinate":[103.5901,36.3043],value:244},
+		    {"name":"包头","coordinate":[110.3467,41.4899],value:256},
+		    {"name":"北京","coordinate":[116.4551,40.2539],value:147},
+		    {"name":"北海","coordinate":[109.314,21.6211],value:47},
+		    {"name":"南京","coordinate":[118.8062,31.9208],value:248},
+		    {"name":"南宁","coordinate":[108.479,23.1152],value:258},
+		    {"name":"南昌","coordinate":[116.0046,28.6633],value:99},
+		    {"name":"日照","coordinate":[119.2786,35.5023],value:140},
+		    {"name":"昆明","coordinate":[102.9199,25.4663],value:189},
+		    {"name":"杭州","coordinate":[119.5313,29.8773],value:244},
+		    {"name":"枣庄","coordinate":[117.323,34.8926],value:256},
+		    {"name":"柳州","coordinate":[109.3799,24.9774],value:147},
+		    {"name":"株洲","coordinate":[113.5327,27.0319],value:47},
+		    {"name":"武汉","coordinate":[114.3896,30.6628],value:248},
+		    {"name":"汕头","coordinate":[117.1692,23.3405],value:258},
+		    {"name":"江门","coordinate":[112.6318,22.1484],value:99}
+		];
+		var heatOption={       //配置参数
+			min:0,         //最小值
+			max:300,       //最大值
+			color:['#d94e5d','#eac736','#50a3ba']   //颜色
+		}
+		bmapEchart.overlyHeatMap('heatmap1',heatMapData,heatOption);
+	}
+	//柱状图 
+	function overlyBar(){
+		var barData=[{"regionName":"成都","cp":[103.9526,30.7617],"xData":["数据A","数据B","数据C"],"yData":[100,150,35]},
+			{"regionName":"济南","cp":[117.1582,36.8701],"xData":["数据A","数据B","数据C","数据D"],"yData":[10,60,30,100]},
+			{"regionName":"兰州","cp":[103.5901,36.3043],"xData":["数据A","数据B","数据C","数据D"],"yData":[20,60,30,80]}
+			]  
+		var barOption={   //柱状图配置参数
+			colorArr:['#F75D5D','#59ED4F','#4C91E7',"#91c7ae"],
+			width:'15%' ,  // 柱状图宽,支持百分比
+			height:'20%'   //柱状图高
+		}
+		bmapEchart.overlyBar('bar1',barData,barOption);
+	}
+	//图片
+	function overlyImg(){
+		var imgOption={   //图片参数
+			coords:[116.0046,28.6633],     //地理坐标，图片叠加位置
+			imgPath:'../img/home.png',       //图片路径
+			width:20,                   //图片宽
+			height:20					//图片高
+		}
+		bmapEchart.overlyImg("img1",imgOption);
+		var imgOption2={   //图片参数
+			coords:[87.9236,43.5883],     //地理坐标，图片叠加位置
+			imgPath:'../img/home.png',       //图片路径
+			width:'13%',                   //图片宽
+			height:'15%'					//图片高
+		}
+		bmapEchart.overlyImg("img2",imgOption2);
+	}
+	//echarts点
+	function overlySpot(){
+		var spotOption={    //点配置参数
+			name:"chengdu",
+			coord:[103.5901,36.3043],
+			type:"effectScatter",
+			symbolSize:20,    //图标大小
+			symbol:'circle',   //图标类型，支持'circle','rect'等及图片路径，svg
+			symbolOffset:[0,0], //图标相对原来位置的偏移量
+			show:true, // 是否显示文本
+			textOffset:[0,0],  //文本偏移量
+			textColor:"#111",   //文本颜色
+			fontSize:12,       //文字大小
+			fontStyle:'normal',   //字体风格
+			fontWeight: 'normal',          //字体粗细
+			fontFamily:'sans-serif',         //字体系列       
+			color:"#ff6020"       //图标颜色，当symbol为图片时，此参数无效
+		}
+		bmapEchart.overlyScatterSpot(spotOption);
+		spotOption.name="大同";
+		spotOption.coord=[113.7854,39.8035]
+		spotOption.textOffset=[0,-15];
+		spotOption.type="scatter",
+		bmapEchart.overlyScatterSpot(spotOption);
+
+		var option={
+			imgPath:'',   //图片路径
+			width:50,     //图片宽
+			height:50,     //图片高
+			text:"你好",      //标记点文本
+			x:0,         //标记点水平偏移量
+			y:0,         //标记点垂直偏移量
+			animation:BMAP_ANIMATION_BOUNCE,    //点动画
+		};
+		bmapEchart.overlyBmapSpot([114.3896,30.6628],option);
+	}
+	//echart线
+	function overlyLine(){
+		var linesData=[{name:"城北",coords:[[121.4648,31.2891],[113.8953,22.901],[118.7073,37.5513]]},
+			{name:"城北",coords:[[113.4229,22.478],[111.4783,36.1615],[124.541,40.4242],[119.5642,28.1854]]},
+			{name:"东西",coords:[[108.479,23.1152],[116.0046,28.6633]]}
+		];   
+		var lineOption={    //线参数
+			color:'#FF4500',      //颜色
+			width:1,      // 线宽
+			type:'solid',       // 线类型
+			opacity:1,    // 透明度
+			curveness:0   //曲率
+		};
+		var animationOption={  //动画参数
+			show:true,  //是否开启动画
+			effectShow:true,  //是否开启尾迹动画
+			constantSpeed:20,  //动画速度
+			trailLength:0.2,    //尾迹长度
+			symbolSize:5, //图标大小
+			color:'#00cc00',  //颜色,
+			effectColor:"#4169E1",
+			symbol:'circle',  //尾迹样式
+			loop:true
+		};
+		bmapEchart.overlyLine('line1',linesData,lineOption,animationOption);
+	}
+	//自定义导航
+	function customNavigation(){
+		var polylineStyle={
+			strokeColor:'#00FA9A',    //线的颜色
+			strokeWeight:5,           //线的宽度
+			strokeOpacity:1,          //透明度
+			strokeStyle:'solid'       //线的类型
+
+		};
+		var imgOption={               //图片的参数
+			imgPath:'http://lbsyun.baidu.com/jsdemo/img/car.png',                 //图片路劲
+			width:52,                   //宽
+			height:26,                  //高
+			offset:[0,0]              //偏移量
+		}
+		var map=bmapEchart.getMap();
+		map.centerAndZoom(new BMap.Point(103.9526,30.7617), 13);
+		var drv = new BMap.DrivingRoute('成都', {
+	        onSearchComplete: function(res) {
+	        	if (drv.getStatus() == BMAP_STATUS_SUCCESS) {
+	                var plan = res.getPlan(0);
+	                var arrPois =[];
+	                for(var j=0;j<plan.getNumRoutes();j++){
+	                    var route = plan.getRoute(j);
+	                    arrPois= arrPois.concat(route.getPath());
+	                }
+	                bmapEchart.customNavigation(arrPois,polylineStyle,imgOption);
+	            }
+	        }
+	    });
+	    var p1 = new BMap.Point(104.148521,30.696758);
+		var p2 = new BMap.Point(103.891202,30.795595);
+	    drv.search(p1, p2);
+	}
+
+	function getMapCoord(geoData){
+		var data={};
+		for(var i=0; i<geoData.features.length;++i){
+			data[geoData.features[i].properties.name]=geoData.features[i].properties.cp;
+		}
+		return data;
+	}
+</script>
+
+</html>
