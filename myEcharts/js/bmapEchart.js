@@ -734,9 +734,11 @@ gradualColor:{        //是否渐变色，此参数可省略，即不使用渐�
 */
 bMapEchart.prototype.overlyBezierCurve=function(curveName,dazData,curveOption){
 	var map=this.getMap();
-	var point = new BMap.Point(84.9023,42.148);    
-	var pixel=map.pointToPixel(point);  
-	console.log(pixel);
+	// var point = new BMap.Point(84.9023,42.148);    
+	// var pixel=map.pointToPixel(point);  
+	// console.log(pixel);
+	// var ss=getControlPoint([{x:0,y:100},{x:100,y:0},{x:200,y:200},{x:300,y:0}]);
+	// console.log(ss);
 	var ArrayCtor = typeof Float32Array === 'undefined'
 	    ? Array
 	    : Float32Array;
@@ -1152,9 +1154,11 @@ bMapEchart.prototype.dropBazMarke=function(){
     }
     ComplexCustomOverlay.prototype.draw = function(){
       var map = this._map;
-      var pixel = map.pointToOverlayPixel(this._point);
-      this._div.style.left = pixel.x - parseInt(this._arrow.style.left) + "px";
-      this._div.style.top  = pixel.y - 30 + "px";
+      // var pixel = map.pointToOverlayPixel(this._point);
+      // this._div.style.left = pixel.x - parseInt(this._arrow.style.left) + "px";
+      // this._div.style.top  = pixel.y - 30 + "px";
+      this._div.style.left=0;
+      this._div.style.top=0;
     }
     var txt = "银湖海岸城", mouseoverTxt = txt + " " + parseInt(Math.random() * 1000,10) + "套" ;
         
@@ -1163,6 +1167,135 @@ bMapEchart.prototype.dropBazMarke=function(){
     map.addOverlay(myCompOverlay);
 }
 
+//计算贝塞尔曲线的控制点
+/*
+	originPoint:源点 形如[{x:1,y:1},{x:12,y:45}]
+*/
+// function getControlPoint(originPoint){
+// 	var scale=0.6;     //控制点收索系数
+// 	var midPoint=[];   //相邻源点的中点
+// 	var count=originPoint.length;
+// 	for(var i=0;i<count;i++){
+// 		// if(i==originPoint.length-1){
+// 		// 	break;
+// 		// }
+// 		var nexti = (i + 1) % count;  
+//         // midpoints[i].x = (originPoint[i].x + originPoint[nexti].x)/2.0;  
+//         // midpoints[i].y = (originPoint[i].y + originPoint[nexti].y)/2.0;  
+// 		midPoint[i]={x:0,y:0};
+// 		midPoint[i].x=(originPoint[i].x+originPoint[nexti].x)/2;
+// 		midPoint[i].y=(originPoint[i].y+originPoint[nexti].y)/2;
+// 	}
+// 	//平移中点
+// 	var extrapoints=[];
+// 	for(var i=0;i<count;i++){
+// 		var nexti = (i + 1) % count;  
+//          var backi = (i + count - 1) % count;  
+// 		// var nexti=j+1;
+// 		// var backi=j-1;
+// 		var midinmid={x:0,y:0};
+// 		midinmid.x=(midPoint[i].x+midPoint[backi].x)/2;
+// 		midinmid.y=(midPoint[i].y+midPoint[backi].y)/2;
+// 		var offsetx=originPoint[i].x - midinmid.x;
+// 		//offsetx = originPoint[i].x - midinmid.x;
+// 		var offsety=originPoint[i].y - midinmid.y;
+
+// 		var extraindex = 2*i;
+// 		extrapoints[extraindex]={x:0,y:0};
+// 		extrapoints[extraindex].x = midPoint[backi].x + offsetx;  
+//         extrapoints[extraindex].y = midPoint[backi].y + offsety;  
+
+//          //朝 originPoint[i]方向收缩   
+//          var addx = (extrapoints[extraindex].x - originPoint[i].x) * scale;  
+//          var addy = (extrapoints[extraindex].y - originPoint[i].y) * scale;  
+//          extrapoints[extraindex].x = originPoint[i].x + addx;  
+//          extrapoints[extraindex].y = originPoint[i].y + addy;  
+           
+//          var extranexti = (extraindex + 1)%(2 * count);
+//          extrapoints[extranexti]={x:0,y:0};  
+//          extrapoints[extranexti].x = midPoint[i].x + offsetx;  
+//          extrapoints[extranexti].y = midPoint[i].y + offsety;  
+//          //朝 originPoint[i]方向收缩   
+//          addx = (extrapoints[extranexti].x - originPoint[i].x) * scale;  
+//          addy = (extrapoints[extranexti].y - originPoint[i].y) * scale;  
+//          extrapoints[extranexti].x = originPoint[i].x + addx;  
+//          extrapoints[extranexti].y = originPoint[i].y + addy;  
+// 	}
+// 	//生成控制点
+// 	var controlPoint=[];
+// 	var curvePoint=[];
+// 	for(var i=0;i<count;i++){
+// 	   controlPoint[0] = originPoint[i];  
+//        var extraindex = 2 * i;  
+//        controlPoint[1] = extrapoints[extraindex + 1];  
+//        var extranexti = (extraindex + 2) % (2 * count);  
+//        controlPoint[2] = extrapoints[extranexti];  
+//        var nexti = (i + 1) % count;  
+//        controlPoint[3] = originPoint[nexti];      
+//        var u = 1;  
+//        while(u >= 0){  
+//            var px = bezier3funcX(u,controlPoint);  
+//            var py = bezier3funcY(u,controlPoint);  
+//            //u的步长决定曲线的疏密  
+//            u -= 0.005;  
+//            //CvPoint tempP = cvPoint(px,py);  
+//            //存入曲线点   
+//            //curvePoint.push_back(tempP); 
+//            curvePoint.push([px,py]); 
+//        }      
+// 	}
+// 	return curvePoint;
+// }
+// function bezier3funcX(uu,controlP){  
+//    var part0 = controlP[0].x * uu * uu * uu;  
+//    var part1 = 3 * controlP[1].x * uu * uu * (1 - uu);  
+//    var part2 = 3 * controlP[2].x * uu * (1 - uu) * (1 - uu);  
+//    var part3 = controlP[3].x * (1 - uu) * (1 - uu) * (1 - uu);     
+//    return part0 + part1 + part2 + part3;   
+// }      
+// function bezier3funcY(uu,controlP){  
+//    var part0 = controlP[0].y * uu * uu * uu;  
+//    var part1 = 3 * controlP[1].y * uu * uu * (1 - uu);  
+//    var part2 = 3 * controlP[2].y * uu * (1 - uu) * (1 - uu);  
+//    var part3 = controlP[3].y * (1 - uu) * (1 - uu) * (1 - uu);     
+//    return part0 + part1 + part2 + part3;   
+// } 
+
+function getControlPoint(originPoint){
+	var count=originPoint.length;
+	var scale=0.6;
+	//获取源点的中点
+	var minPoints=[];
+	for(var i=0;i<originPoint.length;i++){
+		if(i==originPoint.length-1){
+			break;
+		}
+		var x =(originPoint[i].x+originPoint[i+1].x)/2;
+		var y =(originPoint[i].y+originPoint[i+1].y)/2;
+		minPoints.push({x:x,y:y});
+	}
+	for(var i=0;i<count;i++){
+		if(i==originPoint.length-1){
+			break;
+		}
+		var x1=originPoint[i+1].x-originPoint[i].x;
+		var y1=originPoint[i+1].y-originPoint[i].y;
+
+		var x2=originPoint[i+2].x-originPoint[i+1].x;
+		var y2=originPoint[i+2].y-originPoint[i+1].y;
+
+		var len1=Math.sqrt(x1*x1 + y1*y1);
+		var len2=Math.sqrt(x2*x2 + y2*y2);
+		var k1=len1/(len1+len2);
+
+		var xm= minPoints[i].x + (minPoints[i+1].x-minPoints[i].x) * k1;
+		var ym= minPoints[i].y + (minPoints[i+1].y-minPoints[i].y) * k1;
+
+		var ctrlX=xm+(minPoints[i].x - xm)* scale+originPoint[i]-xm;
+		var ctrlY=xm+(minPoints[i].x - xm)* scale+originPoint[i]-xm;
+		//var len1=Math.sqrt(originPoint[i+2].x-originPoint[i+1].x);
+	}
+}
 
 //自定义导航风格
 /*
